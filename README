@@ -1,0 +1,61 @@
+##LightBlog
+
+simple Blog in Python language and Easy development Because it uses a bottle framework .
+
+
+##Instilling lib
+
+sudo apt-get install mysql-server mysql-client
+sudo apt-get install python-mysqldb
+apt-get install python-setuptools
+sudo easy_install bottle
+sudo easy_install postmarkup
+sudo easy_install PyRSS2Gen
+sudo apt-get install python-imaging
+
+##Run blog
+
+1-Create new database. 
+
+{example"
+
+mysql -u root -p
+
+create database test;
+
+"}
+
+2-Edit the file config.
+
+edit config.py {Write settings, contact databases & Email & Cookies} 
+
+3-Run script file "model.py"
+
+run in terminal{
+python model.py
+}
+
+
+4-Run script file "main.py" for test
+run in terminal{
+python main.py
+}
+
+++OR++
+
+Read the different methods of operation in the link.
+
+http://bottlepy.org/docs/dev/tutorial.html#deployment
+
+##url blog
+
+http://127.0.0.1:8080/blog/
+
+##admin panel
+
+http://127.0.0.1:8080/blog/admin
+
+##Development
+
+www.lightscr.net
+sultan4ksa[ at ]gmail.com
