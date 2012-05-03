@@ -7,16 +7,10 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-		%if sections:
-		<title>{{sections}} - {{site[1]}}</title> 
-		<meta name="keywords" content="{{mysection[0][2]}}">
-		<meta name="description" content="{{mysection[0][3]}}">
-		%else:
-		<title>{{site[1]}}</title>
-		<meta name="keywords" content="{{site[2]}}" />
-		<meta name="description" content="{{site[3]}}" />
-		%end
-
+		<title>{{title}}</title>
+		<meta name="keywords" content="{{keywords}}" />
+		<meta name="description" content="{{description}}" />
+    </meta>
     <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -48,6 +42,9 @@
               %end
               <li><a href="/blog/sand">Contact</a></li>
           </ul>
+          <form class="navbar-search pull-left" action="/blog/search" method="post">
+            <input class="search-query span2" name="search" placeholder="Search" type="text">
+          </form>
 			%if not infousername:
 	<ul class="nav pull-right">
 	<li>
@@ -91,11 +88,12 @@
     {{!loginstat}}
 </div>
 %end
+
       <div class="row-fluid">
         <div class="span3">
           <div class="well sidebar-nav">
             <ul class=" nav nav-list">
-              <li class="nav-header">Categorys</li>   
+              <li class="nav-header">Sections</li>   
               <li ><a href="/blog/"><strong>All</strong></a></li>
                 %if allsection:
                 %for section in allsection:
@@ -119,6 +117,11 @@
         
         
         <div class="span9">
+        %if alert:
+  			  <div class="alert alert-info">
+ 	 		  {{alert}}
+				</div>
+			%end
             %if blogs:
             %star=0
   				%for blog in blogs:
@@ -138,28 +141,18 @@
 				%end
             <a class="btn btn-primary pull-right" href="/blog/comment/{{blog[0]}}">Learn more &raquo;</a><p><br></p>
           </div>
-
             %end
             %lend+=star
-            %if sections:
            	%if page>1:
-
-				<br><a class="btn" href="/blog/section/{{sections}}/{{back}}"><< back </a>
+				<br><a class="btn" href="/blog/{{url}}{{back}}"><< back </a>
 				%end
            	%if lend<lblog:
-           	
-             <a class="btn" href="/blog/section/{{sections}}/{{next}}">next >> </a>
-            %end
+             <a class="btn" href="/blog/{{url}}{{next}}">next >> </a>
 
-            %elif not sections:
-				%if page>1:
-				<br><a class="btn" href="/blog/{{back}}"><< back  </a>
-				%end			
-				%if lend<lblog:
-             <a class="btn" href="/blog/{{next}}">next >></a>
-            %end
-            %end
-            %end                     
+            %end  
+            %else:
+            <p>{{noblog}}<p>
+            %end                  
         </div><!--/span-->
       </div><!--/row-->
 

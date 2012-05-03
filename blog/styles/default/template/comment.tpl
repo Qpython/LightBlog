@@ -42,6 +42,9 @@
               %end
               <li><a href="/blog/sand">Contact</a></li>
           </ul>
+          <form class="navbar-search pull-left" action="/blog/search" method="post">
+            <input class="search-query span2" name="search" placeholder="Search" type="text">
+          </form>
 			%if not infousername:
         <form class=" navbar-form pull-right" action="/blog/login" method="post">
         <input name="username" type="text" placeholder="username" class="input-small"/>
@@ -80,7 +83,7 @@
         <div class="span3">
           <div class="well sidebar-nav">
             <ul class=" nav nav-list">
-              <li class="nav-header">Category</li>   
+              <li class="nav-header">Sections</li>   
               <li ><a href="/blog/"><strong>All</strong></a></li>
                 %if allsection:
                 %for section in allsection:
@@ -121,9 +124,16 @@
 				%except NameError:
 				<p>{{blog[3]}}</p>
 				%end
-				
-				
-                        <br><hr>
+				<br>
+			<span class="help-block">Tag:</span>
+			%for start,tag in enumerate(blog[6].split(',')):
+			%if start==0:
+			<span class="help-block"><a href="/blog/tag/{{tag.replace(' ','-')}}">{{tag}}</a></span>
+			%else:
+			<span class="help-block"><a href="/blog/tag/{{tag.replace(' ','-')}}">,{{tag}}</a></span>
+			%end
+			%end
+                        <hr>
             <ul class="thumbnails">
             <li class="span2">
 				<p class="help-block"><strong>{{signatureblog[1]}}</strong></p>
@@ -171,7 +181,7 @@
            <div class="control-group">
          	  <label class="control-label">Comment</label>
             <div class="controls">
-              <textarea name="post" class="span6" placeholder="your Comment ..." rows="7"></textarea>
+              <textarea name="post" class="span6" required="" placeholder="your Comment ..." rows="7"></textarea>
             </div>
           </div>
           <input type="submit" name="Submit" value="Submit" class="btn" />
@@ -191,19 +201,19 @@
           <div class="control-group">
          	  <label class="control-label">Name</label>
             <div class="controls">
-              <input name="name" class="span4"  placeholder="your name" type="text"/>
+              <input name="name" class="span4"  placeholder="your name" required="" type="text"/>
             </div>
           </div>
            <div class="control-group">
          	  <label class="control-label">Email</label>
             <div class="controls">
-              <input name="email" class="span4" placeholder="your@email.com" type="text"/>
+              <input name="email" class="span4" placeholder="your@email.com" required="" type="email"/>
             </div>
           </div>
            <div class="control-group">
          	  <label class="control-label">Comment</label>
             <div class="controls">
-              <textarea name="post" class="span6" placeholder="your Comment ..." rows="7"></textarea>
+              <textarea name="post" class="span6" required="" placeholder="your Comment ..." rows="7"></textarea>
             </div>
           </div>
 

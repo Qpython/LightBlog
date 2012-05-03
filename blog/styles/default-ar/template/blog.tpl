@@ -7,16 +7,10 @@
 <html dir="rtl" lang="ar">
   <head>
     <meta charset="utf-8">
-		%if sections:
-		<title>{{sections}} - {{site[1]}}</title> 
-		<meta name="keywords" content="{{mysection[0][2]}}">
-		<meta name="description" content="{{mysection[0][3]}}">
-		%else:
-		<title>{{site[1]}}</title>
-		<meta name="keywords" content="{{site[2]}}" />
-		<meta name="description" content="{{site[3]}}" />
-		%end
-
+		<title>{{title}}</title>
+		<meta name="keywords" content="{{keywords}}" />
+		<meta name="description" content="{{description}}" />
+    </meta>
     <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
     <!--[if lt IE 9]>
       <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -25,7 +19,6 @@
     <!-- Le styles -->
     <link href="/blog/styles/style/static_file/css/bootstrap.css" rel="stylesheet">
     <link href="/blog/styles/style/static_file/css/blog.css" rel="stylesheet">
-    
 
   </head>
 
@@ -48,6 +41,9 @@
               %end
               <li><a href="/blog/sand">إتصل بنا</a></li>
           </ul>
+          <form class="navbar-search pull-left" action="/blog/search" method="post">
+            <input class="search-query span2" name="search" placeholder="إبحث" type="text">
+          </form>
 			%if not infousername:
 	<ul class="nav pull-right">
 	<li>
@@ -122,6 +118,11 @@
         
         
         <div class="span9">
+        %if alert:
+  			  <div class="alert alert-info">
+ 	 		  {{alert}}
+				</div>
+	%end
             %if blogs:
             %star=0
   				%for blog in blogs:
@@ -141,28 +142,18 @@
 				%end
             <a class="btn btn-primary pull-right" href="/blog/comment/{{blog[0]}}">قراءة المزيد &raquo;</a><p><br></p>
           </div>
-
             %end
             %lend+=star
-            %if sections:
            	%if page>1:
-
-				<br><a class="btn" href="/blog/section/{{sections}}/{{back}}"><< السابق </a>
+				<br><a class="btn" href="/blog/{{url}}{{back}}"><< السابق </a>
 				%end
            	%if lend<lblog:
-           	
-             <a class="btn" href="/blog/section/{{sections}}/{{next}}">التالي >> </a>
-            %end
+             <a class="btn" href="/blog/{{url}}{{next}}">التالي >> </a>
+            %end  
+            %else:
+            <p>{{noblog}}<p>
+            %end 
 
-            %elif not sections:
-				%if page>1:
-				<br><a class="btn" href="/blog/{{back}}"><< السابق  </a>
-				%end			
-				%if lend<lblog:
-             <a class="btn" href="/blog/{{next}}">التالي >></a>
-            %end
-            %end
-            %end                     
         </div><!--/span-->
       </div><!--/row-->
 

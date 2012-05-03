@@ -50,4 +50,9 @@ lang={
       , '''Login Error! <a  href='/blog/rpassword'>Recover Lost Password</a>''' :'''Login Error! <a  href='/blog/rpassword'>Recover Lost Password</a>'''
       , '''hi \n the new password is %s''' :'''hi \n the new password is %s'''
       , '''password was sent successfully''' :'''password was sent successfully'''
+      , '''Category Archives: '%s' ''':'''Category Archives: '%s' '''
+      , '''Tag Archives: '%s' ''':'''Tag Archives: '%s' '''
+      , '''Search Results for: '%s' ''':'''Search Results for: '%s' '''
+      ,'''No blog''':'''No blog'''
+      , '''Number of characters is less than 3''':'''Number of characters is less than 3'''
       }

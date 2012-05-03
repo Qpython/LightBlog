@@ -44,6 +44,9 @@
               %end
               <li><a href="/blog/sand">إتصل بنا</a></li>
           </ul>
+          <form class="navbar-search pull-left" action="/blog/search" method="post">
+            <input class="search-query span2" name="search" placeholder="إبحث" type="text">
+          </form>
 			%if not infousername:
         <form class=" navbar-form pull-right" action="/blog/login" method="post">
         <input name="username" type="text" placeholder="أسم المستخدم" class="input-small"/>
@@ -124,8 +127,17 @@
 				%except NameError:
 				<p>{{blog[3]}}</p>
 				%end
-
-                        <br><hr>
+				 <br>
+			<span class="help-block">كلمات دليلية:</span>
+			%for start,tag in enumerate(blog[6].split(',')):
+			%if start==0:
+			<span class="help-block"><a href="/blog/tag/{{tag.replace(' ','-')}}">{{tag}}</a></span>
+			%else:
+			<span class="help-block"><a href="/blog/tag/{{tag.replace(' ','-')}}">,{{tag}}</a></span>
+			%end
+			%end
+                       <hr>
+                        
             <ul class="thumbnails">
             <li class="span2">
 				<p class="help-block"><strong>{{signatureblog[1]}}</strong></p>
@@ -174,7 +186,7 @@
            <div class="control-group">
          	  <label class="control-label">الرد</label>
             <div class="controls">
-              <textarea name="post" class="span6" placeholder="أكتب ردك هنا..." rows="7"></textarea>
+              <textarea name="post" class="span6" required="" placeholder="أكتب ردك هنا..." rows="7"></textarea>
             </div>
           </div>
           <input type="submit" name="Submit" value="إرسال" class="btn" />
@@ -194,19 +206,19 @@
           <div class="control-group">
          	  <label class="control-label">الأسم</label>
             <div class="controls">
-              <input name="name" class="span4"  placeholder="أسمك" type="text"/>
+              <input name="name" class="span4"  placeholder="أسمك" required="" type="text"/>
             </div>
           </div>
            <div class="control-group">
          	  <label class="control-label">البريد الألكتروني</label>
             <div class="controls">
-              <input name="email" class="span4" placeholder="your@email.com" type="text"/>
+              <input name="email" class="span4" placeholder="your@email.com" required="" type="email"/>
             </div>
           </div>
            <div class="control-group">
          	  <label class="control-label">الرد</label>
             <div class="controls">
-              <textarea name="post" class="span6" placeholder="أكتب ردك هنا" rows="7"></textarea>
+              <textarea name="post" class="span6" placeholder="أكتب ردك هنا" required="" rows="7"></textarea>
             </div>
           </div>
 

@@ -15,28 +15,26 @@ sudo apt-get install python-imaging
 
 ##Run blog
 
-1-Create new database. 
-
+-Create new database. 
 {example"
-
 mysql -u root -p
-
 create database test;
-
 "}
 
-2-Edit the file config.
-
+-Edit the file config.
 edit config.py {Write settings, contact databases & Email & Cookies} 
 
-3-Run script file "model.py"
-
+-Run script file "install.py" for insert tables in database"
 run in terminal{
-python model.py
+python install.py
 }
 
+-Run script file "update.py" for update tables in database
+run in terminal{
+python update.py
+}
 
-4-Run script file "main.py" for test
+-Run script file "main.py" for test
 run in terminal{
 python main.py
 }

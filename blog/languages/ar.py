@@ -50,4 +50,10 @@ lang={
       , '''Login Error! <a  href='/blog/rpassword'>Recover Lost Password</a>''' :'''دخول خاطئ! <a  href='/blog/rpassword'>إستعادة الباسورد المفقود</a>'''
       , '''hi \n the new password is %s''' :'''مرحبا \n الباسورد الجديد هو %s'''
       , '''password was sent successfully''' :'''تم إرسال الباسورد بنجاح'''
+      , '''Category Archives: '%s' ''':'''ارشيف القسم: '%s' '''
+      , '''Tag Archives: '%s' ''':'''ارشيف الوسم: '%s' '''
+      , '''Search Results for: '%s' ''':'''نتائج البحث لـ: '%s' '''
+      ,'''No blog''':'''لايوجد تدوينات'''
+      , '''Number of characters is less than 3''':'''عدد الحروف أقل من 3'''
+
       }

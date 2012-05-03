@@ -38,6 +38,9 @@
               %end
               <li><a href="/blog/sand">Contact</a></li>
           </ul>
+          <form class="navbar-search pull-left" action="/blog/search" method="post">
+            <input class="search-query span2" name="search" placeholder="Search" type="text">
+          </form>
             %if not infousername:
         <form class=" navbar-form pull-right" action="/blog/login" method="post">
         <input name="username" type="text" placeholder="username" class="input-small"/>

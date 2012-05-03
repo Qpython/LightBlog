@@ -11,6 +11,7 @@ def sql():
     db = MySQLdb.connect(config.host, config.username,config.passdb , config.namedb, charset = "utf8", use_unicode = True)
     return db.cursor()
 
+    
 ###########user
 def newuser(username,password, email, ip,date,salt,valid=2,signature='The signature'):
     cursor=sql()
@@ -93,7 +94,6 @@ def lenuser():
     return row
 
 ############blog
-
 def newblog(username,title,titletext,section,keywords, description,ip, date):
     cursor=sql()
     cursor.execute('''INSERT INTO blog(username,title,titletext,date,section,keywords, description,ip,comments) VALUES('%s', '%s' ,'%s','%s','%s','%s','%s','%s',0)'''%(username,title,titletext,date, section, keywords,description, ip ))
@@ -164,7 +164,6 @@ def infoblogmap():
     return row
     
 ############comment
-
 def newcomment(username,page,email,post,ip,avator,date):
     cursor=sql()
     cursor.execute('''INSERT INTO comment(username,page,email,post,date,ip,avator) VALUES('%s', '%d' ,'%s','%s','%s','%s','%s')'''%(username,page,email,post,date,ip,avator))
@@ -226,7 +225,7 @@ def editsection(newsection,keywords,description,  sectionname):
     cursor.execute(("UPDATE section SET sectionname='%s',keywords='%s',description='%s' WHERE sectionname='%s'")%(newsection,keywords,description, sectionname))
     cursor.execute(("UPDATE blog SET section='%s' WHERE section='%s'")%(newsection,  sectionname))
     cursor.close() 
-        
+    
 def deletesection(sectionname):
     cursor=sql()
     cursor.execute(("delete from section where sectionname='%s'")%sectionname)
@@ -275,9 +274,9 @@ def infosite():
     cursor.close() 
     return row
     
-def editsite(title,keywords,description,sitename,siteurl):
+def editsite(title,keywords,description,sitename,siteurl, modsite,modmsg):
     cursor=sql()
-    cursor.execute(("UPDATE site SET title='%s',keywords='%s',description='%s',sitename='%s',siteurl='%s' ")%(title,keywords,description,sitename,siteurl))
+    cursor.execute(("UPDATE site SET title='%s',keywords='%s',description='%s',sitename='%s',siteurl='%s',modsite='%s',modmsg='%s'")%(title,keywords,description,sitename,siteurl, modsite,modmsg))
     cursor.close() 
 
 ##############other
@@ -293,29 +292,46 @@ def editother(cookie_age,waittime,sizeupload,numblog,numcomment,style,styleadmin
     cursor.execute(("UPDATE other SET cookie_age='%s',waittime='%d',sizeupload='%d',numblog='%d',numcomment='%d',style='%s',styleadmin='%s',language='%s',avatorwidth='%d',avatorheight='%d'")%(cookie_age,waittime,sizeupload,numblog,numcomment,style,styleadmin,language,avatorwidth,avatorheight))
     cursor.close() 
     
-    
-if __name__ == "__main__":
-    password=raw_input('add new password admin:')
-    email=raw_input('add new email admin:')
-    salt=prandom()
-    password=pssmd5(password,salt)
+############tag
+def infoblogtag(tag, start,end):
     cursor=sql()
-    date=datetime.now().ctime()
-    cursor.execute('CREATE TABLE users (Id INT PRIMARY KEY AUTO_INCREMENT, username VARCHAR(50), password VARCHAR(50), email VARCHAR(100), ip VARCHAR(20), date VARCHAR(100),valid INT,avator VARCHAR(20),signature TEXT,password2 VARCHAR(50),salt VARCHAR(6))DEFAULT CHARSET=utf8')
-    cursor.execute('CREATE TABLE blog (Id INT PRIMARY KEY AUTO_INCREMENT, username VARCHAR(50), title VARCHAR(100), titletext TEXT, date VARCHAR(100),section VARCHAR(100),keywords TEXT,description TEXT,ip VARCHAR(20),comments INT)DEFAULT CHARSET=utf8')
-    cursor.execute('CREATE TABLE comment (Id INT PRIMARY KEY AUTO_INCREMENT, username VARCHAR(50), page INT(10), email VARCHAR(100), post TEXT, date VARCHAR(100),ip VARCHAR(20),avator VARCHAR(20))DEFAULT CHARSET=utf8')
-    cursor.execute('CREATE TABLE section (Id INT PRIMARY KEY AUTO_INCREMENT, sectionname VARCHAR(100),keywords TEXT,description TEXT)DEFAULT CHARSET=utf8')
-    cursor.execute('CREATE TABLE valid (Id INT PRIMARY KEY AUTO_INCREMENT, validblognew TEXT,validcommen TEXT,validadmin TEXT,valideditusers TEXT,validblogedit TEXT,validcommentedit TEXT)DEFAULT CHARSET=utf8')
-    cursor.execute('CREATE TABLE site (Id INT PRIMARY KEY AUTO_INCREMENT, title VARCHAR(100),keywords TEXT,description TEXT,sitename VARCHAR(100),siteurl VARCHAR(100))DEFAULT CHARSET=utf8')
-    cursor.execute('CREATE TABLE other (Id INT PRIMARY KEY AUTO_INCREMENT, cookie_age VARCHAR(100),waittime INT,sizeupload INT,numblog INT,numcomment INT,style VARCHAR(100),styleadmin VARCHAR(100),language VARCHAR(100),avatorwidth INT,avatorheight INT)DEFAULT CHARSET=utf8')
-    cursor.execute("INSERT INTO users(username,password,email,ip,date,valid,avator,signature,password2,salt) VALUES('admin', '%s' ,'%s','127.0.0.1','%s',1,'1','MY signature','%s','%s')"%(password,email, date, password, salt))
-    cursor.execute("INSERT INTO blog(username,title,titletext,date,section,keywords,description,ip,comments) VALUES('admin', 'Hello!' ,'This is an example of a post.','%s','General','examle1,examle2,examle3','examle for description','127.0.0.1','0')"%date)
-    cursor.execute("INSERT INTO comment(username,page,email,post,date,ip,avator) VALUES('admin', 1 ,'%s','This is an example of a comment.','%s','127.0.0.1','1')"%(email, date))
-    cursor.execute("INSERT INTO section(sectionname,keywords,description) VALUES('General','keywords1,keywords2,keywords3','examle for description')")
-    cursor.execute("INSERT INTO valid(validblognew,validcommen,validadmin,valideditusers,validblogedit,validcommentedit) VALUES('%s','%s','%s','%s','%s','%s')"%('1,2', '', '1', '1', '1','1'))
-    cursor.execute("INSERT INTO  site(title,keywords,description,sitename,siteurl) VALUES('%s','%s','%s','%s','%s')"%('LightBlog', 'blog,Easy,simple,python,LightBlog'
-    , 'simple Blog in Python language and Easy development Because it uses a bottle framework.', 'mysyte', 'www.site.com'))
-    cursor.execute("INSERT INTO other (cookie_age,waittime,sizeupload,numblog,numcomment,style,styleadmin,language,avatorwidth,avatorheight) VALUES('9000',10,2097152,10,10,'default','admin','en',100,100)")
-    cursor.close()
-    raw_input('Been completed successfully create the database,Press the enter for exit.')
+    cursor.execute("SELECT * FROM blog where keywords LIKE '%%%s%%' ORDER BY Id  DESC LIMIT %d,%d"%(tag, start, end))
+    row=cursor.fetchall()
+    cursor.close() 
+    return row
 
+def lenblogtag(tag):
+    cursor=sql()
+    cursor.execute("SELECT * from blog where keywords LIKE '%%%s%%'"%(tag))
+    row=cursor.rowcount
+    cursor.close() 
+    return row
+
+def iftag(tag):
+    cursor=sql()
+    row=cursor.execute(("SELECT * from blog where keywords LIKE '%%%s%%'")%(tag))
+    row=cursor.fetchall()
+    cursor.close() 
+    return row
+    
+############search
+def infoblogsearch(search, start,end):
+    cursor=sql()
+    cursor.execute("SELECT * FROM blog where titletext LIKE '%%%s%%' ORDER BY Id  DESC LIMIT %d,%d"%(search, start, end))
+    row=cursor.fetchall()
+    cursor.close() 
+    return row
+
+def lenblogsearch(search):
+    cursor=sql()
+    cursor.execute("SELECT * from blog where titletext LIKE '%%%s%%'"%(search))
+    row=cursor.rowcount
+    cursor.close() 
+    return row
+
+def ifsearch(search):
+    cursor=sql()
+    row=cursor.execute(("SELECT * from blog where titletext LIKE '%%%s%%'")%(search))
+    row=cursor.fetchall()
+    cursor.close() 
+    return row

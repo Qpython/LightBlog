@@ -9,7 +9,7 @@ Copyright (c) 2012, Sultan Alenazi.
 License: MIT (see LICENSE for details)
 """
 __author__ = 'Sultan Alenazi'
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 __license__ = 'MIT'
 
 from bottle import route, run, post, request, response, template, debug, static_file, redirect, error, abort
@@ -17,7 +17,9 @@ import bottle
 from model import  newuser, userstable,editusers,deleteuser, lenuser, infoall, infofetchall, newblog, infoblog, infoblogall \
 , newcomment, infocomments , lenblog, deleteblog, editblog, editcomment, deletecomment, infocommentall \
 , newsection, editsection, deletesection, infosection, infoblogsection, lenblogsection,ifsection,  infovalid,infovalids,  editvalid,infosite, editsite, infoblogip\
-,infocommentip,infoblogmap, editusersnopass, editusercp, editusercppass, addblog2comm,delblog2comm, infoother, editother,editpass2, updateuser, updateemail
+,infocommentip,infoblogmap, editusersnopass, editusercp, editusercppass, addblog2comm,delblog2comm, infoother, editother,editpass2, updateuser, updateemail\
+, infoblogtag, lenblogtag, iftag, infoblogsearch, lenblogsearch, ifsearch
+
 import CaptchasDotNet
 from cgi import escape as xss
 from MySQLdb import escape_string as xsql
@@ -62,6 +64,8 @@ validblogedit=valids[5]
 validcommentedit=valids[6]
 
 infomysite=infosite()
+modsite=infomysite[6]
+modmsg=infomysite[7]
 
 ##########import language
 try:
@@ -82,38 +86,109 @@ def rblog():
 @route('/blog/<page:int>')
 def blog(loginstat='', page=1):
     username=infousername=request.get_cookie("account", secret=secretkey)
+    if not modsite:
+        return template('styles/'+style+'/template/info', title=lang['info'],infousername=infousername, text=modmsg , site=infomysite)
     next,back,ends=page+1, page-1, numblog
     start= (page- 1) * ends
     blogs=list(infoblogall(start, ends))
     lblog=int(lenblog())
     lend=(page*numblog)-numblog
+    site=infomysite
+    title=site[1]
+    keywords=site[2]
+    description=site[3]
+    url=''
     if username:
-        return template('styles/'+style+'/template/blog',lblog=lblog,lend=lend, next=next,back=back,  page=page , loginstat='', username=username, blogs=blogs,  infousername=infousername, rposts=infocommentall(numcomment), sections=None,mysection=None, allsection=infosection(), site=infomysite)
-    return template('styles/'+style+'/template/blog',lblog=lblog, lend=lend,next=next ,back=back, page=page , loginstat=loginstat, username=username, blogs=blogs, infousername=infousername, rposts=infocommentall(numcomment), sections=None,mysection=None,allsection= infosection(), site=infomysite)
+        return template('styles/'+style+'/template/blog',title=title, keywords=keywords, description=description,url=url,lblog=lblog,lend=lend, next=next,back=back,  page=page , loginstat='', username=username, blogs=blogs,  infousername=infousername, rposts=infocommentall(numcomment),  allsection=infosection(), site=site, alert='', noblog=lang['''No blog'''])
+    return template('styles/'+style+'/template/blog',title=title, keywords=keywords, description=description,url=url,lblog=lblog, lend=lend,next=next ,back=back, page=page , loginstat=loginstat, username=username, blogs=blogs, infousername=infousername, rposts=infocommentall(numcomment), allsection= infosection(), site=site, alert='', noblog=lang['''No blog'''])
 
 @route('/section/<section>')
 @route('/section/<section>/<page:int>')
 @route('/blog/section/<section>')
 @route('/blog/section/<section>/<page:int>')
 def sectionblog(section,loginstat='', page=1):
+    username=infousername=request.get_cookie("account", secret=secretkey)
+    if not modsite:
+        return template('styles/'+style+'/template/info', title=lang['info'],infousername=infousername, text=modmsg, site=infomysite)
     section=xsql(xss(section.replace('-',' ')))
     next,back,ends=page+1, page-1,numblog
     start= (page- 1) * ends
-    username=infousername=request.get_cookie("account", secret=secretkey)
     blogs=list(infoblogsection(section, start,ends))
     lblog=int(lenblogsection(section))
-    mysection=ifsection(section)
+    mysection=ifsection(section)    
     if not mysection:
-        return template('styles/'+style+'/template/info', title='error',infousername=infousername, text=lang['''You haven't chosen a section'''], site=infomysite)
+        return template('styles/'+style+'/template/info', title=lang['error'],infousername=infousername, text=lang['''You haven't chosen a section'''], site=infomysite)
     lend=(page*numblog)-numblog
+    site=infomysite
+    title=section+' - '+site[1].encode("utf8")
+    keywords=mysection[0][2]
+    description=mysection[0][3]
+    url='''section/%s/'''%(section.replace(' ','-'))
     if username:
-        return template('styles/'+style+'/template/blog', lblog=lblog,lend=lend, next=next,back=back,  page=page , loginstat='', username=username, blogs=blogs,  infousername=infousername, rposts=infocommentall(numcomment), sections=section,mysection=mysection, allsection=infosection(), site=infomysite)
-    return template('styles/'+style+'/template/blog',lblog=lblog, lend=lend,next=next ,back=back, page=page , loginstat=loginstat,username=username, blogs=blogs,infousername=infousername, rposts=infocommentall(numcomment), sections=section,mysection=mysection,allsection= infosection(), site=infomysite)
+        return template('styles/'+style+'/template/blog',title=title, keywords=keywords, description=description, url=url, lblog=lblog,lend=lend, next=next,back=back,  page=page , loginstat='', username=username, blogs=blogs,  infousername=infousername, rposts=infocommentall(numcomment), allsection=infosection(), site=site, alert=lang['''Category Archives: '%s' ''']%section, noblog=lang['''No blog'''])
+    return template('styles/'+style+'/template/blog',title=title, keywords=keywords, description=description,url=url, lblog=lblog, lend=lend,next=next ,back=back, page=page , loginstat=loginstat,username=username, blogs=blogs,infousername=infousername, rposts=infocommentall(numcomment), allsection= infosection(), site=site, alert=lang['''Category Archives: '%s' ''']%section, noblog=lang['''No blog'''])
 
+@route('/tag/<tag>')
+@route('/tag/<tag>/<page:int>')
+@route('/blog/tag/<tag>')
+@route('/blog/tag/<tag>/<page:int>')
+def tagblog(tag,loginstat='', page=1):
+    username=infousername=request.get_cookie("account", secret=secretkey)
+    if not modsite:
+        return template('styles/'+style+'/template/info', title=lang['info'],infousername=infousername, text=modmsg, site=infomysite)
+    tag=xsql(xss(tag.replace('-',' ')))
+    next,back,ends=page+1, page-1,numblog
+    start= (page- 1) * ends
+    blogs=list(infoblogtag(tag, start,ends))
+    lblog=int(lenblogtag(tag))
+    mytag=iftag(tag)
+    if len(tag)<3:
+        return template('styles/'+style+'/template/info', title='error',infousername=infousername, text=lang['''Number of characters is less than 3'''], site=infomysite)
+    lend=(page*numblog)-numblog
+    site=infomysite
+    title=tag+' - '+site[1].encode("utf8")
+    keywords=tag
+    description=tag
+    url='''tag/%s/'''%(tag.replace(' ','-'))
+    if username:
+        return template('styles/'+style+'/template/blog',title=title, keywords=keywords, description=description,url=url, lblog=lblog,lend=lend, next=next,back=back,  page=page , loginstat='', username=username, blogs=blogs,  infousername=infousername, rposts=infocommentall(numcomment), allsection=infosection(), site=site, alert=lang['''Tag Archives: '%s' ''']%tag, noblog=lang['''No blog'''])
+    return template('styles/'+style+'/template/blog',title=title, keywords=keywords, description=description,url=url, lblog=lblog, lend=lend,next=next ,back=back, page=page , loginstat=loginstat,username=username, blogs=blogs,infousername=infousername, rposts=infocommentall(numcomment),allsection= infosection(), site=site, alert=lang['''Tag Archives: '%s' ''']%tag, noblog=lang['''No blog'''])
+
+@route('/search/<search>')
+@route('/search/<search>/<page:int>')
+@route('/blog/search/<search>')
+@route('/blog/search/<search>/<page:int>')
+def searchblog(search,loginstat='', page=1):
+    username=infousername=request.get_cookie("account", secret=secretkey)
+    if not modsite:
+        return template('styles/'+style+'/template/info', title=lang['info'],infousername=infousername, text=modmsg, site=infomysite)
+    search=xsql(xss(search.replace('-',' ')))
+    next,back,ends=page+1, page-1,numblog
+    start= (page- 1) * ends
+    blogs=list(infoblogsearch(search, start,ends))
+    lblog=int(lenblogsearch(search))
+    mysearch=ifsearch(search)
+    if len(search)<3:
+        return template('styles/'+style+'/template/info', title='error',infousername=infousername, text=lang['''Number of characters is less than 3'''], site=infomysite)
+    lend=(page*numblog)-numblog
+    site=infomysite
+    title=search+' - '+site[1].encode("utf8")
+    keywords=search
+    description=search
+    url='''search/%s/'''%(search.replace(' ','-'))
+    if username:
+        return template('styles/'+style+'/template/blog',title=title, keywords=keywords, description=description,url=url,lblog=lblog,lend=lend, next=next,back=back,  page=page , loginstat='', username=username, blogs=blogs,  infousername=infousername, rposts=infocommentall(numcomment) , allsection=infosection(), site=site, alert=lang['''Search Results for: '%s' ''']%search, noblog=lang['''No blog'''])
+    return template('styles/'+style+'/template/blog',title=title, keywords=keywords, description=description,url=url,lblog=lblog, lend=lend,next=next ,back=back, page=page , loginstat=loginstat,username=username, blogs=blogs,infousername=infousername, rposts=infocommentall(numcomment),allsection= infosection(), site=site, alert=lang['''Search Results for: '%s' ''']%search, noblog=lang['''No blog'''])
+
+@post('/search')
+@post('/blog/search')
+def search():    
+    search=request.forms.get('search')
+    redirect("/blog/search/%s"%search.replace(' ','-'))
+    
 @post('/login')
 @post('/blog/login')
 def login_submit():
-    infousername=request.get_cookie("account", secret=secretkey)
     username=unicode(xsql(xss(request.forms.get('username'))), encoding='utf-8')
     password= unicode(xsql(xss(request.forms.get('password'))), encoding='utf-8')
     box= request.forms.get('box')
@@ -129,7 +204,7 @@ def login_submit():
             else:
                 response.set_cookie("account",username,secret=secretkey, max_age=cookie_age)
                 response.set_cookie("validuser",validuser,secret=secretkey, max_age=cookie_age)
-            return template('styles/'+style+'/template/info', title='info',infousername=infousername, text='''<META HTTP-EQUIV="Refresh" CONTENT="0;URL=/blog/"><a  href='/blog/'>return  home</a>''', site=infomysite)
+            redirect("/blog/")
     return blog(lang['''Login Error! <a  href='/blog/rpassword'>Recover Lost Password</a>'''])
 
 @route('/signout')
@@ -145,12 +220,16 @@ def login_out():
 @route('/blog/rpassword')
 def rpassword_form():
     infousername=request.get_cookie("account", secret=secretkey)
+    if not modsite:
+        return template('styles/'+style+'/template/info', title=lang['info'],infousername=infousername, text=modmsg, site=infomysite)
     return template('styles/'+style+'/template/rpassword',error='', infousername=infousername, random=captchas.random (), image=captchas.image (), audio_url=captchas.audio_url (), site=infomysite)
 
 @post('/rpassword')
 @post('/blog/rpassword')
 def rpassword_submit():
     infousername=request.get_cookie("account", secret=secretkey)
+    if not modsite:
+        return template('styles/'+style+'/template/info', title=lang['info'],infousername=infousername, text=modmsg, site=infomysite)
     email= xsql(xss(request.forms.get('email')))
     capt= xss(request.forms.get('capt'))
     ip = request.get('REMOTE_ADDR')
@@ -173,12 +252,16 @@ def rpassword_submit():
 @route('/blog/register')
 def register_form():
     infousername=request.get_cookie("account", secret=secretkey)
+    if not modsite:
+        return template('styles/'+style+'/template/info', title=lang['info'],infousername=infousername, text=modmsg, site=infomysite)
     return template('styles/'+style+'/template/register',infousername=infousername, error='', random=captchas.random (), image=captchas.image (), audio_url=captchas.audio_url (), site=infomysite)
 
 @post('/register')
 @post('/blog/register')
 def register_submit():
     infousername=request.get_cookie("account", secret=secretkey)
+    if not modsite:
+        return template('styles/'+style+'/template/info', title=lang['info'],infousername=infousername, text=modmsg, site=infomysite)
     username= unicode(xsql(xss(request.forms.get('username'))), encoding='utf-8')
     password= unicode(xsql(xss(request.forms.get('password'))), encoding='utf-8')
     password2= unicode(xsql(xss(request.forms.get('password2'))), encoding='utf-8')
@@ -206,13 +289,14 @@ def register_submit():
     dirs=os.path.dirname(__file__)+'/avator/'
     avator=str(id)
     copy2(dirs+'0'+'.jpeg', dirs+avator+'.jpeg')
-
     return template('styles/'+style+'/template/info', title=lang['Welcome'],infousername=infousername, text=lang['''You have been successfully registered'''], site=infomysite)
 
 @route('/new')
 @route('/blog/new')
 def new_form():
     username =infousername=request.get_cookie("account", secret=secretkey)
+    if not modsite:
+        return template('styles/'+style+'/template/info', title=lang['info'],infousername=infousername, text=modmsg, site=infomysite)
     validuser=request.get_cookie("validuser", secret=secretkey)
     if username:
         if int(validuser) in listtoint(validblognew):
@@ -224,6 +308,8 @@ def new_form():
 @post('/blog/new')
 def new_submit():
     username=infousername=request.get_cookie("account", secret=secretkey)
+    if not modsite:
+        return template('styles/'+style+'/template/info', title=lang['info'],infousername=infousername, text=modmsg, site=infomysite)
     validuser=request.get_cookie("validuser", secret=secretkey)
     title= unicode(xsql(xss(request.forms.get('title'))), encoding='utf-8')
     titletext= unicode(xsql(request.forms.get('titletext')), encoding='utf-8')
@@ -276,6 +362,8 @@ def sand_submit():
 @route('/blog/comment/<id:int>')
 def blog_id(id):
     infousername=request.get_cookie("account", secret=secretkey)
+    if not modsite:
+        return template('styles/'+style+'/template/info', title=lang['info'],infousername=infousername, text=modmsg, site=infomysite)
     validuser=request.get_cookie("validuser", secret=secretkey)
     blog=infoblog(id)
     comments=infocomments(id)
@@ -290,11 +378,12 @@ def blog_id(id):
         return template('styles/'+style+'/template/comment',page=id,blog=blog,comments=comments , infousername=infousername, allsection=infosection(),validcommen=validcommen, onvalidcommen=onvalidcommen,signatureblog=signatureblog, rposts=infocommentall(numcomment), site=infomysite)
     return template('styles/'+style+'/template/info', title=lang['error'],infousername=infousername, text=lang['Please, enter a correct ID'], site=infomysite)
     
-    
 @post('/comment/sandcomment/<page:int>')
 @post('/blog/comment/sandcomment/<page:int>')
 def comment_submit(page):
     infousername=request.get_cookie("account", secret=secretkey)
+    if not modsite:
+        return template('styles/'+style+'/template/info', title=lang['info'],infousername=infousername, text=modmsg, site=infomysite)
     validuser=request.get_cookie("validuser", secret=secretkey)
     if infousername:
         name=infousername
@@ -339,6 +428,8 @@ def comment_submit(page):
 @route('/blog/usercp')
 def usercp():
     infousername=request.get_cookie("account", secret=secretkey)
+    if not modsite:
+        return template('styles/'+style+'/template/info', title=lang['info'],infousername=infousername, text=modmsg, site=infomysite)
     if infousername:
         infouser=infofetchall('username', infousername)[0]
         return template('styles/'+style+'/template/usercp',error='', infousername=infousername,infouser=infouser,site=infomysite)
@@ -348,6 +439,8 @@ def usercp():
 @post('/blog/usercp')
 def usercp_submit():
     infousername=username=request.get_cookie("account", secret=secretkey)
+    if not modsite:
+        return template('styles/'+style+'/template/info', title=lang['info'],infousername=infousername, text=modmsg, site=infomysite)
     password=unicode(xsql(xss(request.forms.get('password'))), encoding='utf-8')
     rpassword=unicode(xsql(xss(request.forms.get('rpassword'))), encoding='utf-8')
     email=unicode(xsql(xss(request.forms.get('email'))), encoding='utf-8')
@@ -370,6 +463,8 @@ def usercp_submit():
 @post('/blog/usercp/pic')
 def usercp_pic():
     username=infousername=request.get_cookie("account", secret=secretkey)
+    if not modsite:
+        return template('styles/'+style+'/template/info', title=lang['info'],infousername=infousername, text=modmsg, site=infomysite)
     if infousername:
         try: # Windows needs stdio set for binary mode.
             from msvcrt import setmode
@@ -426,13 +521,15 @@ def usercp_pic():
 @route('/blog/rss')
 @route('/blog/rss.xml')
 def rss():
-    site=infomysite
+    infousername=request.get_cookie("account", secret=secretkey)
+    if not modsite:
+        return template('styles/'+style+'/template/info', title=lang['info'],infousername=infousername, text=modmsg, site=infomysite)
     blog=infoblogall(0, 10)
     lblog=len(blog)
     try:
-        rss= PyRSS2Gen.RSS2(title = site[1],link = site[5], description = site[3])
+        rss= PyRSS2Gen.RSS2(title = infomysite[1],link = infomysite[5], description = infomysite[3])
         for i in range(0, lblog):
-            rss.items.append(PyRSS2Gen.RSSItem(title = blog[i][2],link ='http://%s/blog/comment/%s'%(site[5], blog[i][0]),description = blog[i][7]))
+            rss.items.append(PyRSS2Gen.RSSItem(title = blog[i][2],link ='http://%s/blog/comment/%s'%(infomysite[5], blog[i][0]),description = blog[i][7]))
         response.content_type = 'text/xml; charset=UTF-8' 
         return  rss.to_xml("utf-8")
     except NameError:
@@ -441,6 +538,9 @@ def rss():
 @route('/sitemap')
 @route('/blog/sitemap')
 def sitemap():
+    infousername=request.get_cookie("account", secret=secretkey)
+    if not modsite:
+        return template('styles/'+style+'/template/info', title=lang['info'],infousername=infousername, text=modmsg, site=infomysite)
     section=infosection()
     blog=infoblogmap()
     return template('styles/'+styleadmin+'/template/sitemap', section=section,blog=blog,site=infomysite )
@@ -448,6 +548,9 @@ def sitemap():
 @route('sitemap.xml')
 @route('/blog/sitemap.xml')
 def sitemapxml():
+    infousername=request.get_cookie("account", secret=secretkey)
+    if not modsite:
+        return template('styles/'+style+'/template/info', title=lang['info'],infousername=infousername, text=modmsg, site=infomysite)
     response.content_type = 'text/xsl; charset=UTF-8' 
     return template('styles/'+styleadmin+'/template/sitemapxml', section=infosection(),blog=infoblogmap(),today=date.today(), site=infomysite )
 
@@ -527,7 +630,7 @@ def admin_section():
         if int(validuser) in listtoint(validadmin):
             return template('styles/'+styleadmin+'/template/section',sections=infosection())
         return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["You do not have administrative powers"])
-    return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["pless login username <br><a  href='/blog/'>return login page</a>"])
+    return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["Please login username <br><a  href='/blog'>return login page</a>"])
        
 @post('/admin/section')
 @post('/blog/admin/section')
@@ -565,7 +668,7 @@ def admin_valid():
         if int(validuser) in listtoint(validadmin):
             return template('styles/'+styleadmin+'/template/valid',infovalids=infovalids())
         return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["You do not have administrative powers"])
-    return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["pless login username <br><a  href='/blog/'>return login page</a>"])
+    return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["Please login username <br><a  href='/blog'>return login page</a>"])
      
 @post('/admin/valid')
 @post('/blog/admin/valid')
@@ -593,12 +696,12 @@ def admin_site():
         if int(validuser) in listtoint(validadmin):
             return template('styles/'+styleadmin+'/template/site', site=infomysite)
         return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["You do not have administrative powers"])
-    return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["pless login username <br><a  href='/blog/'>return login page</a>"])
+    return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["Please login username <br><a  href='/blog'>return login page</a>"])
 
 @post('/admin/site')
 @post('/blog/admin/site')
 def edit_site():
-    global infomysite
+    global infomysite, modsite, modmsg
     username = request.get_cookie("account", secret=secretkey)
     validuser=request.get_cookie("validuser", secret=secretkey)
     title= unicode(xsql(xss(request.forms.get('title'))), encoding='utf-8')
@@ -606,12 +709,16 @@ def edit_site():
     description= unicode(xsql(xss(request.forms.get('description'))), encoding='utf-8')
     sitename= unicode(xsql(xss(request.forms.get('sitename'))), encoding='utf-8')
     siteurl= unicode(xsql(xss(request.forms.get('siteurl'))), encoding='utf-8')    
+    modsite= int(xsql(request.forms.get('modsite')))
+    modmsg= unicode(xsql(request.forms.get('modmsg')), encoding='utf-8')  
     if username:
         if int(validuser) in listtoint(validadmin):
-            editsite(title,keywords,description,sitename,siteurl)
+            editsite(title,keywords,description,sitename,siteurl,modsite,modmsg)
             infomysite=infosite()
+            modsite=infomysite[6]
+            modmsg=infomysite[7]
             return template('styles/'+styleadmin+'/template/infoadmin',msg=lang['The new settings have been saved'])
-
+              
 @route('/admin/other')
 @route('/blog/admin/other')
 def admin_other():
@@ -621,7 +728,7 @@ def admin_other():
         if int(validuser) in listtoint(validadmin):
             return template('styles/'+styleadmin+'/template/other', other=infoother())
         return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["You do not have administrative powers"])
-    return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["pless login username <br><a  href='/blog/'>return login page</a>"])
+    return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["Please login username <br><a  href='/blog'>return login page</a>"])
 
 @post('/admin/other')
 @post('/blog/admin/other')
@@ -667,7 +774,7 @@ def view_userstable():
             lend=luser/end
             return template('styles/'+styleadmin+'/template/users',row=row, back=back, next=next, page=page, luser=luser, lend=lend )
         return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["You do not have administrative powers"])
-    return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["pless login username <br><a  href='/blog/'>return login page</a>"])
+    return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["Please login username <br><a  href='/blog'>return login page</a>"])
 
 @route('/admin/editusers/<id:int>')
 @route('/blog/admin/editusers/<id:int>')
@@ -680,7 +787,7 @@ def edit_users(id):
             if int(validuser) in listtoint(valideditusers):
                 return template('styles/'+styleadmin+'/template/edit_users', raw=raw[0])
             return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["You do not have administrative powers"])
-        return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["pless login username <br><a  href='/blog/'>return login page</a>"])
+        return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["Please login username <br><a  href='/blog'>return login page</a>"])
     return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["No user name is incorrect"])
  
 @post('/admin/editusers/<id:int>')
@@ -716,7 +823,7 @@ def save_userstable(id):
                 editusersnopass(valid, signature, id)
             return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["Data has been saved new user  <br><a href='/blog/admin/userstable'>return userstable page</a>"])
         return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["You do not have administrative powers"])
-    return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["pless login username <br><a  href='/blog/'>return login page</a>"])
+    return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["Please login username <br><a  href='/blog'>return login page</a>"])
 
 @post('/admin/editusers/pic')
 @post('/blog/admin/editusers/pic')
@@ -788,7 +895,7 @@ def edit_blog(id):
                 return template('styles/'+styleadmin+'/template/edit_blog',blog=blog, sections=infosection())
             return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["ID error"])
         return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["You do not have administrative powers"])
-    return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["pless login username <br><a  href='/blog/'>return login page</a>"])
+    return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["Please login username <br><a  href='/blog'>return login page</a>"])
 
 @post('/admin/blogedit/<id:int>')
 @post('/blog/admin/blogedit/<id:int>')
@@ -825,7 +932,7 @@ def edit_comment():
                 return template('styles/'+styleadmin+'/template/edit_comment', comment=comment)
                 return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["ID error"])
         return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["You do not have administrative powers"])
-    return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["pless login username <br><a  href='/blog/'>return login page</a>"])
+    return template('styles/'+styleadmin+'/template/infoadmin',msg=lang["Please login username <br><a  href='/blog'>return login page</a>"])
 
 @post('/admin/commentedit')
 @post('/blog/admin/commentedit')
@@ -843,9 +950,6 @@ def save_comment():
                 deletecomment(id)
             editcomment(comment, id)
             return '''<META HTTP-EQUIV="Refresh" CONTENT="0;URL=/blog/comment/%s">'''%page
-
-
-
 
 ###########static
 @route('/avator/:filename')
